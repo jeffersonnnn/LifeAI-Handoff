@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum LoveLanguage {
+  ActsOfService  
+  WordsOfAffirmation
+  QualityTime
+  PhysicalTouch
+  ReceivingGifts
+}
+
+enum ReminderType {
+  Call
+  Text
+  DateNight
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  partners  Partner[]
+  googleId  String?
+  settings  UserSettings?
+}
+
+model UserSettings {
+  id                 Int      @id @default(autoincrement())
+  user               User     @relation(fields: [userId], references: [id])
+  userId             Int @unique
+  timeZone           String?
+  notificationEmail  String?
+}
+
+model Partner {
+  id                    Int      @id @default(autoincrement())
+  name                  String
+  meetingAnniversary    DateTime
+  loveLanguage          LoveLanguage
+  firstKissReminder     DateTime
+  onlineStores          String[]
+  offlineStores         String[]
+  partnerRecommendation String
+  partnerProfilePicture String?
+  musicTastes           String[]
+  favouriteArtists      String[]
+  user                  User     @relation(fields: [userId], references: [id])
+  userId                Int
+  tweets                Tweet[]
+  reminders             Reminder[]
+  dateNightReminder     DateTime
+  dateNightRecommendation String
+}
+
+model Tweet {
+  id            Int      @id @default(autoincrement())
+  text          String
+  tweetDate     DateTime
+  partner       Partner  @relation(fields: [partnerId], references: [id])
+  partnerId     Int
+}
+
+model Reminder {
+  id            Int           @id @default(autoincrement())
+  partner       Partner       @relation(fields: [partnerId], references: [id])
+  partnerId     Int
+  reminderType  ReminderType
+  reminderDate  DateTime
+}
+
+model PasswordResetRequest {
+  id            Int      @id @default(autoincrement())
+  email         String
+  token         String   @unique
+  expiration   DateTime
+}
